@@ -1,0 +1,13 @@
+[project]
+name = "Aethon"
+version = "1.0.0"
+description = "Protecting precriptions, online reviews and articles free from fraud"
+authors = [
+    { name="Partha Khanna", email="parthakfree@gmail.com" }
+    { name="Bhargav Shivakumar", email="bhargavshiv23@gmail.com}
+]
+dependencies = [
+    "requests>=2.28.1",
+    "pandas>=1.5.0"
+]
+requires-python = ">=3.10"
