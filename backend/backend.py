@@ -24,7 +24,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)
-sonar = SonarClient()
+# sonar = SonarClient()
 
 def process_image(image_data):
     try:
@@ -70,8 +70,6 @@ def detect_fraud():
             text = process_image(content)
         elif input_type == 'url':
             text = process_url(content)
-        elif input_type == 'text':
-            text = content
         else:
             return jsonify({"error": "Invalid input type"}), 400
         

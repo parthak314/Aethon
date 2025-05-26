@@ -58,6 +58,6 @@ class SonarClient:
         return {
             "is_fraud": any(keyword in answer for keyword in fraud_keywords[model_type]),
             "reasoning": data.get("answer", "No analysis available"),
-            "sources": data.get("sources", [])[:3]
+            # "sources": data.get("sources", [])[:3] # required?
         }
     
