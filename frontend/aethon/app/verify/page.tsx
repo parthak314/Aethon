@@ -15,6 +15,7 @@ export default function verify() {
   const [file, setFile] = useState<File>()
   const webcamRef = useRef<Webcam>(null);
   const [image, setImage] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState("");
   
   const capture = useCallback(() => {
     const screenshot = webcamRef.current?.getScreenshot();
@@ -76,15 +77,15 @@ export default function verify() {
                         ref={webcamRef}
                         screenshotFormat="image/jpeg"
                         videoConstraints={videoConstraints}
-                        className="border border-black" />
-                      <button  onClick={capture} className="py-2 px-2 bg-blue-800 text-white rounded-full hover:bg-purple-500">
+                        className="border border-black gap-5" />
+                      <button  onClick={capture} className="py-3 px-2 bg-blue-800 text-white rounded-full hover:bg-purple-500">
                         Take Photo
                       </button>
                     </>
                   ) : ( 
                     <>
                       <img src={image} alt="Captured" />
-                      <button onClick={() => setImage(null)} className="py-2 px-2 bg-blue-800 text-white rounded-full hover:bg-purple-500" >
+                      <button onClick={() => setImage(null)} className="py-3 px-2 bg-blue-800 text-white rounded-full hover:bg-purple-500" >
                         Retake
                       </button>
                       </>
@@ -93,7 +94,11 @@ export default function verify() {
                 }
                 { current == "review" && 
                   <form className="w-full flex flex-col gap-2">
-                    <input className="border-2 border-black text-black bg-white"/>
+                    <input 
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      className="border-2 border-black text-black bg-white"/>
                   </form> }
                 { current == "upload" &&
                   <form onSubmit={onSubmit} className="text-black flex flex-col w-full items-start">
