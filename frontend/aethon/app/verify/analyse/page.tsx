@@ -102,8 +102,8 @@ export default function Analyse() {
             </div>
           </div>
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-700 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-              Analyzing Content
+            <h1 className="text-4xl py-2 font-bold bg-gradient-to-r from-purple-700 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+              Analysing Content
             </h1>
             <p className="text-gray-600 text-lg">Processing prescription data and checking for fraud indicators...</p>
           </div>
@@ -117,7 +117,7 @@ export default function Analyse() {
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-700 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl py-2 font-bold bg-gradient-to-r from-purple-700 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-4">
             Analysis Complete
           </h1>
           <p className="text-gray-600 text-lg">Prescription fraud detection results</p>

@@ -50,7 +50,7 @@ export default function Verify() {
 
   let payload = []
 
-  if (current == "prescription"){
+  if (current == "photo"){
     payload = ["image", image]
   }
   else{
@@ -309,7 +309,7 @@ export default function Verify() {
                   <button onClick={() => Submit()} className="px-12 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-full hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold text-lg">
                     <Link href="/verify/analyse" className="flex items-center gap-3">
                       <CheckCircle className="w-5 h-5" />
-                      Analyze & Submit
+                      Analyse & Submit
                     </Link>
                   </button>
                 </div>
