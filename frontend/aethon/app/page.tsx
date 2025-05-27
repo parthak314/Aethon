@@ -1,4 +1,4 @@
-
+import Link from "next/link"
 
 export default function Home() {
   return (
@@ -7,12 +7,12 @@ export default function Home() {
         <div className="w-full max-w-4xl flex flex-col gap-6 bg-gray-800 p-6 rounded-2xl shadow-xl z-10 items-center">
           <div className="flex content-center py-15">
             <h1 className="text-4xl font-bold text-white">
-              Welcome, verify fradulent stuff here
+              Welcome, verify fraudulent stuff here
             </h1>
           </div>
           <div className="flex py-5">
             <button className="px-2 py-2 border-2 border-black bg-white text-black rounded-full hover:bg-purple-500">
-              Find out here
+              <Link href="/verify">Find out here</Link>
             </button>
           </div>
         </div>
