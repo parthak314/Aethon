@@ -1,7 +1,7 @@
 [project]
 name = "Aethon"
 version = "1.0.0"
-description = "Protecting precriptions, online reviews and articles free from fraud"
+description = "Protecting precriptions, online reviews and articles free from fraud using Perplexity Sonar"
 authors = [
     { name="Partha Khanna", email="parthakfree@gmail.com" },
     { name="Bhargav Shivakumar", email="bhargavshiv23@gmail.com" }
@@ -16,3 +16,4 @@ dependencies = [
     "python-dotenv>=1.0.0"
 ]
 requires-python = ">=3.10"
+
