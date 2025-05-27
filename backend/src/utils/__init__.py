@@ -1,6 +1,6 @@
 # Utility functions for the fraud detection system.
 
-__all__ = ["process_image", "process_url"]
+__all__ = ["ImageProcessor", "WebScraper"]
 
-from .image_processing import process_image
+from .image_processing import ImageProcessor
 from .web_scraper import WebScraper

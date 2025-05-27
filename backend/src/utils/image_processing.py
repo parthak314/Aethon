@@ -1,6 +1,8 @@
+# Need to check if this is the best way, or to send this to sora itself, the image.
+
 from typing import Tuple, Optional
 import base64
-from PIL import Image, ImageEnhance
+from PIL import Image
 from io import BytesIO
 import pytesseract
 import numpy as np
