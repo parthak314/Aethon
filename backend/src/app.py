@@ -4,9 +4,9 @@ import base64
 from io import BytesIO
 from typing import Dict, Any
 
-from .sonar_client import SonarClient
 from utils.web_scraper import WebScraper
-from utils.image_processor import ImageProcessor
+from utils.image_processing import ImageProcessor
+from sonar_client import SonarClient
 
 app = Flask(__name__)
 CORS(app)
@@ -15,9 +15,10 @@ sonar = SonarClient()
 web_scraper = WebScraper()
 image_processor = ImageProcessor()
 
-@app.route('/analyse', methods=['POST'])
-def analyse() -> Dict[str, Any]:
+@app.route('/analyse', methods=['POST'])  
+def analyse() -> Dict[str, Any]: 
     try:
+        data = request.get_json() 
         if not data or 'input_type' not in data or 'content' not in data:
             return jsonify({"error": "Missing Fields"}), 400
 
@@ -34,13 +35,15 @@ def analyse() -> Dict[str, Any]:
                 processed_img, text = image_processor.process_image(content)
                 processed_text = text if text else ""
             except Exception as e:
+                app.logger.error(f"Image processing error: {str(e)}")
                 return jsonify({"error": f"Image processing failed: {str(e)}"}), 400
 
         elif input_type == 'url':
             try:
-                raw_html, content = web_scraper.getch_page(content)
+                raw_html, content = web_scraper.fetch_page(content)
                 processed_text = content if content else ""
             except Exception as e:
+                app.logger.error(f"Scraping error: {str(e)}")
                 return jsonify({"error": f"Web scraping failed: {str(e)}"}), 400
 
         elif input_type == 'text':
@@ -49,13 +52,19 @@ def analyse() -> Dict[str, Any]:
         else:
             return jsonify({"error": "Invalid input type"}), 400
         
-        if model_type not in ['prescription', 'review']:
+        # Validate processed text
+        if not processed_text.strip():
+            return jsonify({"error": "No processable content found"}), 400
+        
+        # Validate model type
+        if model_type not in ['prescription', 'reviews']: 
             return jsonify({"error": "Invalid model type"}), 400
 
         try:
-            analysis = sonar.analyse(processed_text, model_type=model_type)
+            analysis = sonar.analyse(processed_text, model_type=model_type) 
         except Exception as e:
-            return jsonify({"error": f"Sonar analysis failed: {str(e)}"}), 500
+            app.logger.error(f"Sonar error: {str(e)}")
+            return jsonify({"error": f"Analysis failed: {str(e)}"}), 500
 
         return jsonify({
             "fraud_detected": analysis['is_fraud'],
@@ -65,6 +74,7 @@ def analyse() -> Dict[str, Any]:
         })
 
     except Exception as e:
+        app.logger.error(f"Unexpected error: {str(e)}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 @app.route('/health', methods=['GET'])
