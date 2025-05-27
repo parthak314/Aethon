@@ -86,7 +86,6 @@ class WebScraper:
         
 if __name__ == '__main__':
     scraper = WebScraper()
-    url = 'https://example.com'
-    raw_html, content = scraper.fetch_page("https://bbc.co.uk")
+    raw_html, content = scraper.fetch_page("https://www.nandos.co.uk/")
     print(f"Content length: {len(content)} characters")
     print(f"Raw HTML length: {len(raw_html)} characters")

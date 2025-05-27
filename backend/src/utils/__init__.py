@@ -3,4 +3,4 @@
 __all__ = ["process_image", "process_url"]
 
 from .image_processing import process_image
-from .web_scraper import process_url
+from .web_scraper import WebScraper
