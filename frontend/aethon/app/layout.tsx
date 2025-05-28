@@ -36,6 +36,9 @@ export default function ClientLayout({
           <nav className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-8">
+
+                <p className="flex items-center gap-2 text-white hover:text-purple-200 transition-colors duration-200 font-bold text-xl"> Aethon </p>
+               
                 <Link
                   href={nextPath}
                   className="flex items-center gap-2 text-white hover:text-purple-200 transition-colors duration-200 font-semibold"
