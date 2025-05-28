@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Zap, Stethoscope, FileText, AlertTriangle } from "lucide-react"
+import { Zap, Stethoscope, FileText, AlertTriangle, MonitorCog} from "lucide-react"
 
 export default function Home() {
   return (
@@ -28,7 +28,7 @@ export default function Home() {
               Prescription Fraud Detection
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl">
-              Advanced verification system to identify and prevent fraudulent prescriptions
+              Advanced verification system to identify and prevent fraudulent prescriptions or online reviews
             </p>
           </div>
 
@@ -48,9 +48,9 @@ export default function Home() {
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-200">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg">
-              <FileText className="w-6 h-6 text-purple-600" />
+              <MonitorCog className="w-6 h-6 text-purple-600" />
             </div>
-            <h2 className="text-4xl py-4 font-bold bg-gradient-to-r from-purple-700 to-pink-600 bg-clip-text text-transparent">
+            <h2 className="text-4xl px-2 py-4 font-bold bg-gradient-to-r from-purple-700 to-pink-600 bg-clip-text text-transparent">
               About Our System
             </h2>
           </div>

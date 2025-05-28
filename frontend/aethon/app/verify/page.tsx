@@ -5,10 +5,10 @@ import type React from "react"
 import Link from "next/link"
 import { useState, useRef, useCallback } from "react"
 import Webcam from "react-webcam"
-import { Camera, Upload, LinkIcon, FileText, MessageSquare, CheckCircle, RotateCcw } from "lucide-react"
-import { preconnect } from "react-dom"
+import { Camera, Upload, LinkIcon, FileText, MessageSquare, CheckCircle, RotateCcw, BadgeCheck, Check } from "lucide-react"
 
-const ip = "http://192.168.0.9:5000"
+
+const ip = "http://172.29.109.113:5000/analyse"
 
 const videoConstraints = {
   width: 1920,
@@ -30,44 +30,34 @@ export default function Verify() {
     }
   }, [webcamRef])
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!file) return
-
-    try {
-      const data = new FormData()
-      data.set("file", file)
-
-      const res = await fetch(ip, {
-        method: "POST",
-        body: data,
-      })
-      if (!res.ok) throw new Error(await res.text())
-    } catch (e: any) {
-      console.error(e)
-    }
-  }
-
-  let payload = []
-
-  if (current == "photo"){
-    payload = ["image", image]
-  }
-  else{
-    payload = ["url", inputValue]
-  }
-
   const Submit = async () => {
-    console.log("hello");
-  const res = await fetch(ip, {
+    let payload = []
+
+    if (current == "photo"){
+      payload = ["image", image]
+    }
+    else if(current == "review"){
+      payload = ["url", inputValue]
+    }
+    else{
+      const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file!);
+      reader.onload  = () => resolve(reader.result as string);
+      reader.onerror = reject;
+    });
+      payload = ["image", base64];
+  }
+    const res = await fetch(ip, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ input: payload }),  // send your variable here
+    body: JSON.stringify({ input: payload }),
   });
 
   const data = await res.json();
+  console.log(data)
 };
 
   return (
@@ -76,7 +66,7 @@ export default function Verify() {
         <div className="w-full max-w-6xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-700 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-4">
+            <h1 className="text-4xl py-2 font-bold bg-gradient-to-r from-purple-700 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-4">
               Prescription Verification System
             </h1>
             <p className="text-gray-600 text-lg">Choose your verification method below</p>
@@ -89,7 +79,7 @@ export default function Verify() {
               <section className="lg:w-1/2 p-8 bg-gradient-to-br from-purple-50 to-pink-50 border-r border-purple-200">
                 <div className="space-y-4">
                   <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                    <FileText className="w-6 h-6 text-purple-600" />
+                    <Check className="w-6 h-6 text-purple-600" />
                     Verification Options
                   </h2>
 
@@ -97,11 +87,11 @@ export default function Verify() {
                   <div className="space-y-3">
                     <button
                       onClick={() => set("prescription")}
-                      className={`w-full p-4 rounded-xl text-left transition-all duration-300 flex items-center gap-3 ${
-                        current === "prescription" || current === "photo" || current === "upload"
-                          ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
-                          : "bg-white text-gray-700 hover:bg-purple-100 border border-purple-200"
-                      }`}
+                   className={`w-full p-4 rounded-xl text-left transition-all duration-300 flex items-center gap-3 ${
+                      current === "prescription" || current === "photo" || current === "upload"
+                        ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                        : "bg-white text-gray-700 hover:bg-purple-100 border border-purple-200 hover:border-purple-300"
+                    }`}
                     >
                       <FileText className="w-5 h-5" />
                       <span className="font-semibold text-lg">Prescription Verification</span>
@@ -243,8 +233,7 @@ export default function Verify() {
                         <Upload className="w-5 h-5 text-orange-600" />
                         Upload Prescription
                       </h3>
-
-                      <form onSubmit={onSubmit} className="space-y-6">
+                      <div className="space-y-6">
                         <div className="border-2 border-dashed border-orange-300 rounded-xl p-8 bg-orange-50 hover:bg-orange-100 transition-colors duration-300">
                           <div className="text-center space-y-4">
                             <Upload className="w-12 h-12 text-orange-500 mx-auto" />
@@ -272,15 +261,7 @@ export default function Verify() {
                             <span className="text-green-700 font-medium">{file.name}</span>
                           </div>
                         )}
-
-                        <button
-                          type="submit"
-                          disabled={!file}
-                          className="w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                        >
-                          Upload File
-                        </button>
-                      </form>
+                      </div>
                     </div>
                   )}
 
