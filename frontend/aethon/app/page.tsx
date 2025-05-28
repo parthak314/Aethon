@@ -57,17 +57,15 @@ export default function Home() {
 
           <div className="text-gray-700 text-lg leading-relaxed space-y-4">
             <p>
-              Our advanced verification system utilizes Sonar API to detect and prevent
+              Our advanced verification system utilises Sonar API to detect and prevent
               fraudulent prescriptions or online reviews, protecting both healthcare providers and patients.
             </p>
             <p>
-              The system analyzes prescription patterns, validates prescriber credentials, cross-references patient
-              histories, and identifies suspicious activities in real-time. Our comprehensive database ensures accurate
-              verification while maintaining patient privacy and HIPAA compliance.
+              The system analyses prescription patterns, validates prescriber credentials, reviewer behaviour, information authenticity and identifies suspicious activities in real-time, providing a comprehensive report of its findings.
             </p>
             <p>
-              With machine learning algorithms and extensive medical databases, we provide healthcare professionals with
-              the tools they need to make informed decisions and maintain the integrity of prescription drug
+              Thanks to Sonar API, we provide healthcare professionals and patients with
+              the tools they need to make informed decisions and maintain the integrity of prescription and online review
               distribution.
             </p>
           </div>
@@ -79,14 +77,14 @@ export default function Home() {
                 <Zap className="w-8 h-8 text-white" />
               </div>
               <h3 className="font-semibold text-purple-800 mb-2">Fast Verification</h3>
-              <p className="text-gray-600 text-sm">Quick response times resulting in a smooth verification process thanks to Perplexity's Sonar model</p>
+              <p className="text-gray-600 text-sm">Quick response times resulting in a smooth verification process.</p>
             </div>
             <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-100 rounded-xl border border-emerald-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg w-fit mb-3">
                 <Stethoscope className="w-8 h-8 text-white" />
               </div>
               <h3 className="font-semibold text-emerald-800 mb-2">Medical Compliance</h3>
-              <p className="text-gray-600 text-sm">HIPAA compliant system following all medical data regulations</p>
+              <p className="text-gray-600 text-sm">Ensures patient data protection</p>
             </div>
             <div className="p-6 bg-gradient-to-br from-orange-50 to-red-100 rounded-xl border border-orange-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg w-fit mb-3">

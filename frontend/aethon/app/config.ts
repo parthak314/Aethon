@@ -1,5 +1,5 @@
 export const API = {
-  BASE_URL: "http://127.0.0.1:5000",
+  BASE_URL: "http://172.29.109.113:5000",
   ENDPOINTS: {
     ANALYSE: "/analyse"
   }
