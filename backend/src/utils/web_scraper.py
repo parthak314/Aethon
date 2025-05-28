@@ -52,7 +52,7 @@ class WebScraper:
                 timeout=self.timeout
             )
             response.raise_for_status() 
-            return response.text, response.url
+            return response.text, self._parse_content(response.text) # If valid, otherwise revert to ..., response.url
         except requests.exceptions.RequestException as e:
             print(f"Error fetching {url}: {e}")
             return None, None
@@ -78,7 +78,7 @@ class WebScraper:
             for selector in selectors:
                 element = soup.select_one(selector)
                 if element:
-                    return element.get_text(separators='\n', strip=True)
+                    return element.get_text(separator='\n', strip=True)
 
         except Exception as e:
             print(f"Error parsing content: {e}")

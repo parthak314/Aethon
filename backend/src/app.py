@@ -15,7 +15,7 @@ sonar = SonarClient()
 web_scraper = WebScraper()
 image_processor = ImageProcessor()
 
-@app.route('/analyse', methods=['POST'])  
+@app.route('/analyse', methods=['GET', 'POST'])  
 def analyse() -> Dict[str, Any]: 
     try:
         data = request.get_json() 
@@ -33,9 +33,6 @@ def analyse() -> Dict[str, Any]:
 
         processed_text = ""
         if input_type == "image":
-            if ',' in content:
-                content = content.split(',')[1]
-            
             try:
                 # processed_img, text = image_processor.process_image(content)
                 # processed_text = text
@@ -49,7 +46,7 @@ def analyse() -> Dict[str, Any]:
 
         elif input_type == 'url':
             try:
-                raw_html, content = web_scraper.fetch_page(content)
+                _, content = web_scraper.fetch_page(content)
                 processed_text = content if content else ""
                 model_type = 'reviews'
             except Exception as e:
@@ -95,9 +92,9 @@ def analyse() -> Dict[str, Any]:
         app.logger.error(f"Unexpected error: {str(e)}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
-@app.route('/health', methods=['GET'])
-def health_check() -> Dict[str, Any]:
-    return jsonify({"status": "healthy"}), 200
+@app.route('/status', methods=['GET'])
+def status_check() -> Dict[str, Any]:
+    return jsonify({"status": "ok"}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

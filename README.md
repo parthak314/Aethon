@@ -1,34 +1,53 @@
-# AI Fraud Detection System
+# Aethon: AI Fraud Detection System
+An intelligent fraud detection system powered by Perplexity's Sonar API, designed to detect fraudulent prescriptions and fake online reviews through advanced AI analysis.
 
-An intelligent fraud detection system powered by Perplexity's Sonar API.
+![](docs/img/architecture.png)
+### Features
+- Prescription Fraud Detection: Identifies forged or medically unsafe prescriptions
+- Review Authenticity Analysis: Detects fake reviews and astroturfing in online content
+- Multi-Modal Input Support:
+  - Image upload and webcam capture for prescriptions
+  - URL parsing for online reviews
+  - Direct text input
+- Real-time Analysis: Streaming API integration with detailed reasoning
+- Intuitive UI: Clean, responsive interface with clear risk assessment visualization
 
-## Features
+## System Architecture
+Aethon consists of two main components:
+- Backend: Flask API server handling content processing and AI analysis
+- Frontend: Next.js application providing the user interface
 
-- Prescription fraud detection
-- Fake review identification
-- Webcam/image/text input support
-- Real-time analysis
-
-## Architecture
-
-![System Architecture](./docs/architecture.png) 
-<!-- ADD IMAGE DIAGRAM FROM @Bhargav-Shivakumar  -->
+For detailed architecture information, see [System Architecture Documentation](docs/System_Architecture.md).
 
 ## Quick Start
+### Prerequisites
+- Python 3.7+
+- Node.js 18+
 
-make better instructions here
+See the [pyproject.toml](backend/pyproject.toml) and [package.json](frontend/package.json) files for dependencies.
 
-```bash
-# Clone repo
-git clone ...
-cd fraud-detection-system
+## Usage
+1. Navigate to the homepage
+2. Click "Start Verification"
+3. Choose verification method:
+   - Prescription Verification: Upload an image or take a photo
+   - Online Review Analysis: Enter a URL
+4. Review the fraud analysis results
 
-# Set up environment
-cp backend/.env.example backend/.env
-npm install --prefix frontend
+## API Reference
+The backend exposes the following endpoints:
 
-# Run with Docker
-docker-compose up --build
-```
+- `POST /analyse`: Analyses content for potential fraud
+- `GET /status`: Checks API status
+For detailed API documentation, see [API Reference](docs/API_Reference.md).
 
-More things to add here...
+## Development Team
+- Partha Khanna - @parthakfree
+- Bhargav Shivakumar - @bhargavshiv23
+
+## Future Development
+- Support for additional content types (audio, video)
+- Enhanced fraud detection heuristics
+- Integration with healthcare databases
+- RAG system trained on prescription datasets (Kaggle: Illegible Medical Prescription Images)
+- Mobile application support

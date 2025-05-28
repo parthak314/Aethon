@@ -47,6 +47,7 @@ class SonarClient:
                 Act with precision, caution, and a strong bias toward patient safety.
 
                 Do not answer in the first person, but answer as through a medical fraud detection AI, with a professional and objective tone.
+                Also state "high confidence" if you are sure about the prescription being correct and "recommend verification" if needed.
                 """
             ),
             "reviews": (
@@ -67,6 +68,7 @@ class SonarClient:
                 Base your output on known patterns in fake reviews, psychological profiling, and forensic linguistic principles.
 
                 Do not answer in the first person, but answer as through a medical fraud detection AI, with a professional and objective tone.
+                Ensure the review is done on the appearance of the text and the content of the text and if appropriate the source.
                 """
             )
         }
@@ -107,6 +109,7 @@ class SonarClient:
                 "text": text
             })
         elif image_base64:
+            clean_base64 = image_base64.split(",", 1)[-1]
             content.append({
                 "type": "text",
                 "text": "Please analyze the provided image."
@@ -114,7 +117,7 @@ class SonarClient:
             content.append({
                 "type": "image_url",
                 "image_url": {
-                    "url": f"data:image/png;base64,{image_base64}"
+                    "url": f"data:image/png;base64,{clean_base64}"
                 }
             })
 
