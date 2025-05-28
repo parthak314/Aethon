@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { getApiUrl } from "../../config"
+import { useSearchParams } from "next/navigation"
 
 interface ServerResponse {
   fraud_detected: boolean
@@ -23,6 +24,7 @@ interface ServerResponse {
 export default function Analyse() {
   const [isLoading, setIsLoading] = useState(true)
   const [data, setData] = useState<ServerResponse | null>(null)
+  const searchParams = useSearchParams()
 
   const riskScore = 100 - (data?.confidence ?? 0)
 
@@ -37,35 +39,29 @@ export default function Analyse() {
   }, [data])
 
   useEffect(() => {
-    const fetchData = async () => {
-      const timeout = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Request timed out")), 15_000),
-      )
+    // Get data from URL query parameters
+    const queryData = searchParams.get("data")
 
+    if (queryData) {
       try {
-        const res = (await Promise.race([fetch(getApiUrl("ANALYSE")), timeout])) as Response
-        if (!res.ok) {
-          throw new Error(`Server error: ${res.status} ${res.statusText}`)
-        }
-        const json = (await res.json()) as ServerResponse
-        setData({
-          fraud_detected: json.fraud_detected,
-          reasoning: json.reasoning,
-          confidence: json.confidence,
-          processed_text: json.processed_text,
-        })
-      } catch (err) {
-        console.error("Fetch error / timeout:", err)
-        setData({
-          fraud_detected: false,
-          reasoning: "error: " + err,
-          confidence: 0,
-          processed_text: "",
-        })
+        setData(JSON.parse(queryData))
+        setIsLoading(false)
+      } catch (e) {
+        console.error("Error parsing data:", e)
+        // Handle error
       }
+    } else {
+      // Handle missing data case
+      console.error("No analysis data received")
+      setData({
+        fraud_detected: false,
+        reasoning: "No analysis data available. Please submit content first.",
+        confidence: 0,
+        processed_text: ""
+      })
+      setIsLoading(false)
     }
-    fetchData()
-  }, [])
+  }, [searchParams])
 
   const getRiskLevel = (score: number) => {
     if (score <= 30) return { level: "Low Risk", color: "emerald", icon: CheckCircle }

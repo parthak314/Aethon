@@ -5,6 +5,7 @@ import type React from "react"
 import Link from "next/link"
 import { getApiUrl } from "../config";
 import { useState, useRef, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import Webcam from "react-webcam"
 import { Camera, Upload, LinkIcon, FileText, MessageSquare, CheckCircle, RotateCcw, BadgeCheck, Check } from "lucide-react"
 
@@ -21,6 +22,9 @@ export default function Verify() {
   const webcamRef = useRef<Webcam>(null)
   const [image, setImage] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState("")
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
 
   const capture = useCallback(() => {
     const screenshot = webcamRef.current?.getScreenshot()
@@ -30,33 +34,50 @@ export default function Verify() {
   }, [webcamRef])
 
   const Submit = async () => {
-    let payload = []
+    setIsSubmitting(true)
+    try {
+      let payload = []
 
-    if (current == "photo"){
-      payload = ["image", image]
-    }
-    else if(current == "review"){
-      payload = ["url", inputValue]
-    }
-    else{
-      const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file!);
-      reader.onload  = () => resolve(reader.result as string);
-      reader.onerror = reject;
-    });
-      payload = ["image", base64];
-  }
-    const res = await fetch(getApiUrl("ANALYSE"), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ input: payload }),
-  });
+      if (current == "photo") {
+        payload = ["image", image]
+      }
+      else if (current == "review") {
+        payload = ["url", inputValue]
+      }
+      else {
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file!);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+        });
+        payload = ["image", base64];
+      }
+      const res = await fetch(getApiUrl("ANALYSE"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ input: payload }),
+      });
 
-  const data = await res.json();
-  console.log(data)
+      const data = await res.json();
+      console.log(data)
+
+      const encodedData = encodeURIComponent(JSON.stringify(data))
+      router.push(`/verify/analyse?data=${encodedData}`)
+
+      // router.push({
+      //   pathname: "/verify/analyse",
+      //   query: { data: JSON.stringify(data) }
+      // })
+
+    } catch (error) {
+      console.error("Error during submission:", error);
+      alert("An error occurred while submitting. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
 };
 
   return (
@@ -286,11 +307,21 @@ export default function Verify() {
             (current === "upload" && file) ? (
               <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-t border-purple-200">
                 <div className="flex justify-center">
-                  <button onClick={() => Submit()} className="px-12 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-full hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold text-lg">
-                    <Link href="/verify/analyse" className="flex items-center gap-3">
+                    <button onClick={() => Submit()} disabled={isSubmitting} className={`${isSubmitting ? " opacity-50 cursor-not-allowed" : ""} px-12 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-full hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold text-lg`}>
+                    {/* <Link href="/verify/analyse" className="flex items-center gap-3">
                       <CheckCircle className="w-5 h-5" />
                       Analyse & Submit
-                    </Link>
+                    </Link> */}
+                      {isSubmitting ? (
+                        <span className="flex items-center gap-2">
+                          Processing...
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-3">
+                          <CheckCircle className="w-5 h-5" />
+                          Analyse & Submit
+                        </span>
+                      )}
                   </button>
                 </div>
               </div>
