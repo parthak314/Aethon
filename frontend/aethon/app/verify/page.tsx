@@ -3,12 +3,11 @@
 import type React from "react"
 
 import Link from "next/link"
+import { getApiUrl } from "../config";
 import { useState, useRef, useCallback } from "react"
 import Webcam from "react-webcam"
 import { Camera, Upload, LinkIcon, FileText, MessageSquare, CheckCircle, RotateCcw, BadgeCheck, Check } from "lucide-react"
 
-
-const ip = "http://172.29.109.113:5000/analyse"
 
 const videoConstraints = {
   width: 1920,
@@ -48,7 +47,7 @@ export default function Verify() {
     });
       payload = ["image", base64];
   }
-    const res = await fetch(ip, {
+    const res = await fetch(getApiUrl("ANALYSE"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

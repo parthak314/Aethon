@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react"
 import { CheckCircle, AlertTriangle, XCircle, ChartLine } from "lucide-react"
 import Link from "next/link"
-
-const ip = "http://172.29.109.113:5000/analyse"
+import { getApiUrl } from "../../config"
 
 interface ServerResponse {
   fraud_detected: boolean
@@ -41,7 +40,7 @@ export default function Analyse() {
       )
 
       try {
-        const res  = await Promise.race([fetch(ip), timeout]) as Response
+        const res  = await Promise.race([fetch(getApiUrl("ANALYSE")), timeout]) as Response
         if (!res.ok) {
           throw new Error(`Server error: ${res.status} ${res.statusText}`)
         }
