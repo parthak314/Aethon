@@ -1,6 +1,6 @@
 from openai import OpenAI
 import os
-from typing import Dict, Optional, Generator
+from typing import Dict, Union, Generator, Optional
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,9 +13,9 @@ class SonarClient:
         )
         self.model = 'sonar-pro'
 
-    def analyse(self, text: str, model_type: str = "reviews", stream: bool = False) -> Dict[str, any]:
+    def analyse(self, text: str, model_type: str = "reviews", stream: bool = False, image_base64: str = None) -> Union[Dict, Generator]:
         try: 
-            messages = self._build_messages(text, model_type)
+            messages = self._build_messages(text, image_base64, model_type)
             if stream:
                 return self._handle_stream(messages, model_type)
             else:
@@ -23,16 +23,11 @@ class SonarClient:
             
         except Exception as e:
             print(f"Error during analysis: {e}")
-            return {
-                "fraud_detected": False,
-                "reasoning": "Analysis error",
-                "confidence": 0.0
-            }
-
-
-    def _build_messages(self, text: str, model_type: str) -> list:
-        system_prompt = {
-            "prescription" : (
+            return {"error": str(e)}
+    
+    def _get_system_prompt(self, model_type: str) -> str:
+        prompts = {
+            "prescription": (
                 """
                 You are a highly specialized medical fraud detection AI trained on a vast corpus of authentic and forged prescriptions, pharmacological databases, and clinical best practices. 
                 Your primary objective is to identify fraudulent, forged, or medically unsafe prescriptions.
@@ -50,6 +45,8 @@ class SonarClient:
                 4. Reasoning grounded in clinical knowledge and fraud detection patterns.
 
                 Act with precision, caution, and a strong bias toward patient safety.
+
+                Do not answer in the first person, but answer as through a medical fraud detection AI, with a professional and objective tone.
                 """
             ),
             "reviews": (
@@ -68,20 +65,63 @@ class SonarClient:
                 4. Final verdict: Likely Genuine / Possibly Fraudulent / Likely Fraudulent.
 
                 Base your output on known patterns in fake reviews, psychological profiling, and forensic linguistic principles.
+
+                Do not answer in the first person, but answer as through a medical fraud detection AI, with a professional and objective tone.
                 """
             )
         }
+        return prompts.get(model_type)
 
-        return [
+
+    def _build_messages(self, text: Optional[str], image_base64: Optional[str], model_type: str) -> list:
+        # content = []
+        # if text:
+        #     content.append({"type": "text", "text": text})
+        # if image_base64:
+        #     clean_base64 = image_base64.split(",", 1)[-1]
+        #     content.append({"type": "image_url", "image": f"data:image/png;base64,{clean_base64}"})
+
+        # return [
+        #     {
+        #         "role": "system",
+        #         "content": self._get_system_prompt(model_type)
+        #     },
+        #     {
+        #         "role": "user",
+        #         "content": text
+        #     }
+        # ]
+
+        messages = [
             {
                 "role": "system",
-                "content": system_prompt[model_type]
-            },
-            {
-                "role": "user",
-                "content": text
+                "content": self._get_system_prompt(model_type)
             }
         ]
+
+        content = []
+
+        if text and not image_base64:
+            content.append({
+                "type": "text",
+                "text": text
+            })
+        elif image_base64:
+            content.append({
+                "type": "text",
+                "text": "Please analyze the provided image."
+            })
+            content.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{image_base64}"
+                }
+            })
+
+        messages.append({"role": "user", "content": content})
+
+        print(f"Messages for {model_type} model: {messages}")
+        return messages
     
     def _handle_non_stream(self, messages: list, model_type: str) -> Dict:
         response = self.client.chat.completions.create(

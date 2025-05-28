@@ -19,57 +19,75 @@ image_processor = ImageProcessor()
 def analyse() -> Dict[str, Any]: 
     try:
         data = request.get_json() 
-        if not data or 'input_type' not in data or 'content' not in data:
+        print("Received data:", data)  
+        if not data:
+            print("Missing required fields in request data.")
             return jsonify({"error": "Missing Fields"}), 400
 
-        input_type = data['input_type']
-        content = data['content']
-        model_type = data.get('model_type', 'prescription')
+        input_type = data['input'][0]
+        content = data['input'][1]
+
+        # if content.startswith('http'):
+        #     model_type = data.get('model_type', 'review')
+        # else:
 
         processed_text = ""
-        if input_type == 'image':
+        if input_type == "image":
             if ',' in content:
                 content = content.split(',')[1]
             
             try:
-                processed_img, text = image_processor.process_image(content)
-                processed_text = text if text else ""
+                # processed_img, text = image_processor.process_image(content)
+                # processed_text = text
+
+                processed_text = content
+                model_type = 'prescription'
+
             except Exception as e:
-                app.logger.error(f"Image processing error: {str(e)}")
+                print(f"Image processing error: {str(e)}")
                 return jsonify({"error": f"Image processing failed: {str(e)}"}), 400
 
         elif input_type == 'url':
             try:
                 raw_html, content = web_scraper.fetch_page(content)
                 processed_text = content if content else ""
+                model_type = 'reviews'
             except Exception as e:
-                app.logger.error(f"Scraping error: {str(e)}")
+                print(f"Web scraping error: {str(e)}")
                 return jsonify({"error": f"Web scraping failed: {str(e)}"}), 400
 
         elif input_type == 'text':
             processed_text = content
         
         else:
+            print("Invalid input type provided.")
             return jsonify({"error": "Invalid input type"}), 400
         
         # Validate processed text
         if not processed_text.strip():
+            print("No processable content found.")
             return jsonify({"error": "No processable content found"}), 400
         
         # Validate model type
-        if model_type not in ['prescription', 'reviews']: 
+        if model_type not in ['prescription', 'reviews']:
+            print("Invalid model type provided.")
             return jsonify({"error": "Invalid model type"}), 400
 
+        print(f"Processing text: {processed_text[:1000]}...")
+
         try:
-            analysis = sonar.analyse(processed_text, model_type=model_type) 
+            analysis = sonar.analyse( text=processed_text if input_type != 'image' else None,
+                                      image_base64=processed_text if input_type == 'image' else None,
+                                      model_type=model_type)
         except Exception as e:
-            app.logger.error(f"Sonar error: {str(e)}")
+            print(f"Sonar error: {str(e)}")
             return jsonify({"error": f"Analysis failed: {str(e)}"}), 500
 
+        print("Analysis result:", analysis)  
         return jsonify({
-            "fraud_detected": analysis['is_fraud'],
-            "reasoning": analysis['reasoning'],
-            "confidence": analysis['confidence'],
+            "fraud_detected": analysis.get('is_fraud', False),
+            "reasoning": analysis.get('reasoning', ''),
+            "confidence": analysis.get('confidence', 0.5),
             "processed_text": processed_text
         })
 
