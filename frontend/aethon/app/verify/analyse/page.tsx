@@ -13,6 +13,8 @@ import {
 import Link from "next/link"
 import { getApiUrl } from "../../config"
 import { useSearchParams } from "next/navigation"
+import ReactMarkdown from "react-markdown"
+
 
 interface ServerResponse {
   fraud_detected: boolean
@@ -26,7 +28,7 @@ export default function Analyse() {
   const [data, setData] = useState<ServerResponse | null>(null)
   const searchParams = useSearchParams()
 
-  const riskScore = 100 - (data?.confidence ?? 0)
+  const riskScore = Math.round((1 - (data?.confidence ?? 0)) * 100)
 
   useEffect(() => {
     const minLoadingTime = setTimeout(() => {
@@ -39,28 +41,42 @@ export default function Analyse() {
   }, [data])
 
   useEffect(() => {
-    // Get data from URL query parameters
-    const queryData = searchParams.get("data")
+    // Get data from URL query parameters or localStorage
+    const source = searchParams.get("source");
+    const queryData = searchParams.get("data");
 
-    if (queryData) {
+    if (source === "local") {
       try {
-        setData(JSON.parse(queryData))
-        setIsLoading(false)
+        const localData = localStorage.getItem('analysisData');
+        if (localData) {
+          setData(JSON.parse(localData));
+          // Clean up after use
+          localStorage.removeItem('analysisData');
+        } else {
+          throw new Error("No data found in localStorage");
+        }
       } catch (e) {
-        console.error("Error parsing data:", e)
+        console.error("Error retrieving local data:", e);
+        // Handle error
+      }
+    } else if (queryData) {
+      try {
+        setData(JSON.parse(queryData));
+      } catch (e) {
+        console.error("Error parsing data:", e);
         // Handle error
       }
     } else {
       // Handle missing data case
-      console.error("No analysis data received")
+      console.error("No analysis data received");
       setData({
         fraud_detected: false,
         reasoning: "No analysis data available. Please submit content first.",
         confidence: 0,
         processed_text: ""
-      })
-      setIsLoading(false)
+      });
     }
+    setIsLoading(false);
   }, [searchParams])
 
   const getRiskLevel = (score: number) => {
@@ -210,9 +226,45 @@ export default function Analyse() {
               <ChartLine className="w-6 h-6 text-purple-600" />
               Analysis Results
             </h2>
-
-            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl border border-blue-200">
-              <p className="text-blue-700 leading-relaxed">{data.reasoning}</p>
+             <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl border border-blue-200">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => (
+                      <p className="text-blue-700 leading-relaxed">{children}</p>
+                    ),
+                    h1: ({ children }) => (
+                      <h1 className="text-blue-700 text-3xl font-bold my-4">{children}</h1>
+                    ),
+                    h2: ({ children }) => (
+                      <h2 className="text-blue-700 text-2xl font-semibold my-3">{children}</h2>
+                    ),
+                    h3: ({ children }) => (
+                      <h3 className="text-blue-700 text-xl font-medium my-2">{children}</h3>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="list-disc list-inside text-blue-700">{children}</ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol className="list-decimal list-inside text-blue-700">{children}</ol>
+                    ),
+                    li: ({ children }) => (
+                      <li className="ml-4 text-blue-700">{children}</li>
+                    ),
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-blue-400 pl-4 italic text-blue-600 my-4">
+                        {children}
+                      </blockquote>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="font-bold text-blue-700">{children}</strong>
+                    ),
+                    em: ({ children }) => (
+                      <em className="italic text-blue-700">{children}</em>
+                    ),
+                  }}
+                >
+                  {data.reasoning}
+              </ReactMarkdown>
             </div>
 
             <div className="flex justify-center mt-8">

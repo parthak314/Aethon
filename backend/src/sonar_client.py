@@ -47,7 +47,11 @@ class SonarClient:
                 Act with precision, caution, and a strong bias toward patient safety.
 
                 Do not answer in the first person, but answer as through a medical fraud detection AI, with a professional and objective tone.
-                Also state "high confidence" if you are sure about the prescription being correct and "recommend verification" if needed.
+                Also state "high confidence" only if you are sure about the prescription being correct and "recommend verification" if it doesn't look correct.
+                Only output 200 characters of text.
+                You must say "high confidence" if you are sure about the prescription being correct and "recommend verification" if it doesn't look correct.
+                The first 3 characters of the output must be a decimal value of how fraudulent the prescription is, between 0.0 and 1.0 with 0.0 being high fraud and 1.0 being no fraud.
+                This should be followed by a semicolon (;) and then the reasoning.
                 """
             ),
             "reviews": (
@@ -69,6 +73,12 @@ class SonarClient:
 
                 Do not answer in the first person, but answer as through a medical fraud detection AI, with a professional and objective tone.
                 Ensure the review is done on the appearance of the text and the content of the text and if appropriate the source.
+                Only output 200 characters of text.
+                Also state "high confidence" only if you are sure about the review being correct and "recommend verification" if it doesn't look correct.
+                Only output 200 characters of text.
+                You must say "high confidence" if you are sure about the review being correct and "recommend verification" if it doesn't look correct.
+                The first 3 characters of the output must be a decimal value of how fraudulent the review is, between 0.0 and 1.0 with 0.0 being high fraud and 1.0 being no fraud.
+                This should be followed by a semicolon (;) and then the reasoning.
                 """
             )
         }
@@ -157,10 +167,12 @@ class SonarClient:
         fraud_keywords = ["fraud", "forgery", "unsafe", 
                           "dangerous", "invalid", "red flag",
                           "unlicensed", "counterfeit", "suspicious"]
+        print(f"Raw response content: {content}")
+        confidence, reasoning = content.split(';', 1)
         return {
             "fraud_detected": any(keyword in content.lower() for keyword in fraud_keywords),
-            "reasoning": content.strip(),
-            "confidence": self._calculate_confidence(content)
+            "reasoning": reasoning,
+            "confidence": confidence
         }
 
     def _calculate_confidence(self, text: str) -> float:

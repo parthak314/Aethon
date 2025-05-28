@@ -7,12 +7,12 @@ import { getApiUrl } from "../config";
 import { useState, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Webcam from "react-webcam"
-import { Camera, Upload, LinkIcon, FileText, MessageSquare, CheckCircle, RotateCcw, BadgeCheck, Check } from "lucide-react"
+import { Camera, Upload, LinkIcon, FileText, MessageSquare, CheckCircle, RotateCcw, BadgeCheck, Check, Stethoscope, Heart, Activity } from "lucide-react"
 
 
 const videoConstraints = {
-  width: 1920,
-  height: 1080,
+  width: 1080,
+  height: 720,
   facingMode: "user",
 }
 
@@ -33,16 +33,33 @@ export default function Verify() {
     }
   }, [webcamRef])
 
+  const compressImage = (base64: string, quality = 0.6): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080; 
+        canvas.height = 720;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = base64;
+    });
+  };
+
   const Submit = async () => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      let payload = []
+      let payload = [];
 
       if (current == "photo") {
-        payload = ["image", image]
+        // Compress image before sending (same dimensions, lower quality)
+        const compressedImage = await compressImage(image!);
+        payload = ["image", compressedImage];
       }
       else if (current == "review") {
-        payload = ["url", inputValue]
+        payload = ["url", inputValue];
       }
       else {
         const base64 = await new Promise<string>((resolve, reject) => {
@@ -51,8 +68,11 @@ export default function Verify() {
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
         });
-        payload = ["image", base64];
+        // Also compress uploaded images
+        const compressedImage = await compressImage(base64);
+        payload = ["image", compressedImage];
       }
+
       const res = await fetch(getApiUrl("ANALYSE"), {
         method: "POST",
         headers: {
@@ -63,15 +83,15 @@ export default function Verify() {
 
       const data = await res.json();
       console.log(data)
-
-      const encodedData = encodeURIComponent(JSON.stringify(data))
-      router.push(`/verify/analyse?data=${encodedData}`)
-
-      // router.push({
-      //   pathname: "/verify/analyse",
-      //   query: { data: JSON.stringify(data) }
-      // })
-
+      
+      const minimalData = {
+        fraud_detected: data.fraud_detected,
+        reasoning: data.reasoning,
+        confidence: data.confidence
+      };
+      
+      localStorage.setItem('analysisData', JSON.stringify(minimalData));
+      router.push(`/verify/analyse?source=local`);
     } catch (error) {
       console.error("Error during submission:", error);
       alert("An error occurred while submitting. Please try again.");
@@ -79,6 +99,55 @@ export default function Verify() {
       setIsSubmitting(false);
     }
 };
+
+  const MedicalLoadingSpinner = () => {
+    return (
+      <div className="relative w-32 h-32 mx-auto">
+        <div className="absolute inset-0 border-4 border-purple-200 rounded-full"></div>
+        <div className="absolute inset-0 border-4 border-transparent border-t-purple-600 border-r-pink-500 rounded-full animate-spin"></div>
+        <div className="absolute inset-4 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
+          <div className="relative">
+            <Stethoscope className="w-8 h-8 text-purple-600 animate-spin" style={{ animationDuration: "3s" }} />
+            <div className="absolute -top-1 -right-1">
+              <Heart className="w-4 h-4 text-pink-500 animate-pulse" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute inset-0 animate-spin" style={{ animationDuration: "4s" }}>
+          <div className="absolute top-0 left-1/2 w-2 h-2 bg-emerald-500 rounded-full transform -translate-x-1/2 -translate-y-1"></div>
+          <div className="absolute bottom-0 left-1/2 w-2 h-2 bg-blue-500 rounded-full transform -translate-x-1/2 translate-y-1"></div>
+          <div className="absolute left-0 top-1/2 w-2 h-2 bg-orange-500 rounded-full transform -translate-y-1/2 -translate-x-1"></div>
+          <div className="absolute right-0 top-1/2 w-2 h-2 bg-teal-500 rounded-full transform -translate-y-1/2 translate-x-1"></div>
+        </div>
+
+        {/* Pulse wave animation */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute w-16 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-60">
+            <div className="relative w-full h-full">
+              <Activity className="absolute left-0 w-4 h-4 text-emerald-500 animate-pulse transform -translate-y-1/2" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading screen when submitting
+  if (isSubmitting) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100">
+        <div className="text-center space-y-8">
+          <MedicalLoadingSpinner />
+
+          <div className="space-y-4">
+            <h1 className="text-4xl py-2 font-bold bg-gradient-to-r from-purple-700 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+              Analysing
+            </h1>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 py-8">
@@ -107,7 +176,7 @@ export default function Verify() {
                   <div className="space-y-3">
                     <button
                       onClick={() => set("prescription")}
-                   className={`w-full p-4 rounded-xl text-left transition-all duration-300 flex items-center gap-3 ${
+                   className={`w-full cursor-pointer p-4 rounded-xl text-left transition-all duration-300 flex items-center gap-3 ${
                       current === "prescription" || current === "photo" || current === "upload"
                         ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
                         : "bg-white text-gray-700 hover:bg-purple-100 border border-purple-200 hover:border-purple-300"
@@ -119,7 +188,7 @@ export default function Verify() {
 
                     <button
                       onClick={() => set("review")}
-                      className={`w-full p-4 rounded-xl text-left transition-all duration-300 flex items-center gap-3 ${
+                      className={`w-full cursor-pointer p-4 rounded-xl text-left transition-all duration-300 flex items-center gap-3 ${
                         current === "review"
                           ? "bg-gradient-to-r from-blue-500 to-teal-500 text-white shadow-lg"
                           : "bg-white text-gray-700 hover:bg-blue-100 border border-blue-200"
@@ -136,7 +205,7 @@ export default function Verify() {
                       <div className="h-px bg-gradient-to-r from-purple-300 to-pink-300 my-4"></div>
                       <button
                         onClick={() => set("photo")}
-                        className={`w-full p-3 rounded-lg text-left transition-all duration-300 flex items-center gap-3 ${
+                        className={`w-full cursor-pointer p-3 rounded-lg text-left transition-all duration-300 flex items-center gap-3 ${
                           current === "photo"
                             ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
                             : "bg-white text-gray-700 hover:bg-emerald-50 border border-emerald-200"
@@ -148,7 +217,7 @@ export default function Verify() {
 
                       <button
                         onClick={() => set("upload")}
-                        className={`w-full p-3 rounded-lg text-left transition-all duration-300 flex items-center gap-3 ${
+                        className={`w-full cursor-pointer p-3 rounded-lg text-left transition-all duration-300 flex items-center gap-3 ${
                           current === "upload"
                             ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md"
                             : "bg-white text-gray-700 hover:bg-orange-50 border border-orange-200"
@@ -196,7 +265,7 @@ export default function Verify() {
                           </div>
                           <button
                             onClick={capture}
-                            className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-2 font-semibold"
+                            className="px-8 py-3 cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-2 font-semibold"
                           >
                             <Camera className="w-5 h-5" />
                             Capture Photo
@@ -213,7 +282,7 @@ export default function Verify() {
                           </div>
                           <button
                             onClick={() => setImage(null)}
-                            className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-2 font-semibold"
+                            className="px-8 py-3 cursor-pointer bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-2 font-semibold"
                           >
                             <RotateCcw className="w-5 h-5" />
                             Retake Photo
@@ -301,28 +370,21 @@ export default function Verify() {
               </section>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button - No need to show submitting state here anymore */}
             {(current === "photo" && image) ||
             (current === "review" && inputValue) ||
             (current === "upload" && file) ? (
               <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-t border-purple-200">
                 <div className="flex justify-center">
-                    <button onClick={() => Submit()} disabled={isSubmitting} className={`${isSubmitting ? " opacity-50 cursor-not-allowed" : ""} px-12 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-full hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold text-lg`}>
-                    {/* <Link href="/verify/analyse" className="flex items-center gap-3">
-                      <CheckCircle className="w-5 h-5" />
-                      Analyse & Submit
-                    </Link> */}
-                      {isSubmitting ? (
-                        <span className="flex items-center gap-2">
-                          Processing...
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5" />
-                          Analyse & Submit
-                        </span>
-                      )}
-                  </button>
+                    <button 
+                      onClick={() => Submit()} 
+                      className="px-12 py-4 cursor-pointer bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-full hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold text-lg"
+                    >
+                      <span className="flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5" />
+                        Analyse & Submit
+                      </span>
+                    </button>
                 </div>
               </div>
             ) : null}

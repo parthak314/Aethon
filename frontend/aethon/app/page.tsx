@@ -33,7 +33,7 @@ export default function Home() {
           </div>
 
           <div className="flex py-4 z-10">
-            <button className="group px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-full hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-3">
+            <button className="group px-8 py-4 cursor-pointer bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-full hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-3">
               <Link href="/verify" className="flex items-center gap-3">
                 <AlertTriangle className="w-5 h-5" />
                 <span className="font-semibold">Start Verification</span>
@@ -57,9 +57,8 @@ export default function Home() {
 
           <div className="text-gray-700 text-lg leading-relaxed space-y-4">
             <p>
-              Our advanced prescription verification system utilizes cutting-edge technology to detect and prevent
-              fraudulent prescriptions, protecting both healthcare providers and patients from prescription drug abuse
-              and illegal activities.
+              Our advanced verification system utilizes Sonar API to detect and prevent
+              fraudulent prescriptions or online reviews, protecting both healthcare providers and patients.
             </p>
             <p>
               The system analyzes prescription patterns, validates prescriber credentials, cross-references patient
@@ -80,7 +79,7 @@ export default function Home() {
                 <Zap className="w-8 h-8 text-white" />
               </div>
               <h3 className="font-semibold text-purple-800 mb-2">Fast Verification</h3>
-              <p className="text-gray-600 text-sm">Quick response times resulting in a smooth verification process thanks to Perplexity's SORA model</p>
+              <p className="text-gray-600 text-sm">Quick response times resulting in a smooth verification process thanks to Perplexity's Sonar model</p>
             </div>
             <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-100 rounded-xl border border-emerald-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg w-fit mb-3">
