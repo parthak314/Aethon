@@ -51,3 +51,6 @@ For detailed API documentation, see [API Reference](docs/API_Reference.md).
 - Integration with healthcare databases
 - RAG system trained on prescription datasets (Kaggle: Illegible Medical Prescription Images)
 - Mobile application support
+- Login and subscription feature
+- End to end encryption 
+- Improved UI
