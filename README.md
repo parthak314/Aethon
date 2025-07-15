@@ -42,8 +42,8 @@ The backend exposes the following endpoints:
 For detailed API documentation, see [API Reference](docs/API_Reference.md).
 
 ## Development Team
-- Partha Khanna - @parthakfree
-- Bhargav Shivakumar - @bhargavshiv23
+- Partha Khanna - [@parthak314](https://github.com/parthak314)
+- Bhargav Shivakumar - [@bhargav-shivakumar](https://github.com/Bhargav-Shivakumar)
 
 ## Future Development
 - Support for additional content types (audio, video)
